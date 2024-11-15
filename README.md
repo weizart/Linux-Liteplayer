@@ -1,4 +1,4 @@
-### Video_Preview_Tool
+# Video_Preview_Tool
 
 ## Overview
 The `Video_Preview_Tool` is a Python application designed to provide users with a simple and efficient way to preview and manage video files. This tool supports various video formats and offers features such as frame extraction, video trimming, and more.
