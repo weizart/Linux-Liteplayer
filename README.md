@@ -47,5 +47,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contributing
 This repo belonging to @hpcaitech
-
-Main Contributor: Thanks to @ouyangchushang
