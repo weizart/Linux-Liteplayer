@@ -400,7 +400,7 @@ def main():
         page_title="",  # 设置页面标题
         page_icon="",  # 设置页面图标，可以是表情符号或者路径
     )
-    st.title("HPC-AI 视频标注")
+    st.title("视频预览与标注")
 
     # 选择任务
     old_task = st.session_state.current_task_index
