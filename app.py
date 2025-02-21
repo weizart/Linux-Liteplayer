@@ -5,19 +5,22 @@ import os
 import streamlit as st
 import pandas as pd
 import ast 
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 # 基础目录，修改为自己的任务路径
-BASE_DIR = "/mnt/jfs2/hdd2/sora/data/videos/purchase/movie_baidudisk/data/3-1080p-20241108/task_3/_series"
+# BASE_DIR = "/mnt/jfs2/hdd2/sora/data/videos/purchase/movie_baidudisk/data/5-4k+1080p-20241112/task0"
+BASE_DIR =  # 请修改为实际路径
+
 # 临时目录，用于保存截取的视频，修改为自己的一个文件夹
-TEMP_DIR = "/home/weiziang/tmp/1116"
+TEMP_DIR =   # 请修改为实际路径
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 # CSV 文件路径
 CSV_FILENAME = "meta.csv"
-csv_path = os.path.join(TEMP_DIR, CSV_FILENAME)
+csv_path = os.path.join(BASE_DIR, CSV_FILENAME)
 
 # 获取基础目录中的所有子文件夹，并按文件夹名排序
 def get_video_directories(base_dir):
@@ -50,16 +53,14 @@ def trim_video(video_path):
     trimmed_path = os.path.join(TEMP_DIR, trimmed_file_name)
     if not os.path.exists(trimmed_path):
         try:
-            ffmpeg_extract_subclip(video_path, 0, 10, targetname=trimmed_path)
+            ffmpeg_extract_subclip(video_path, 0, 300, targetname=trimmed_path)
         except Exception as e:
             st.error(f"截取视频时出错: {e}")
             return None
     return trimmed_path
 
 # 后台批量裁切所有视频
-@st.cache_data(show_spinner=True)
 def batch_trim_videos(video_files):
-    video_files = [vf for vf in video_files if vf is not None]
     trimmed_videos = []
     with ThreadPoolExecutor(max_workers=4) as executor:
         results = executor.map(trim_video, video_files)
@@ -286,13 +287,14 @@ else:
     df.to_csv(csv_path, index=False)
     st.success(f"已创建新的 CSV 文件并初始化路径: {csv_path}")
 
-representative = []
-for dir in video_data:
-    path = dir["Absolute Path"]
-    file = get_representative_file(get_all_files(path))
-    representative.append(file)
-trimmed_videos = batch_trim_videos(representative)
-st.success(f"已完成共计 {len(trimmed_videos)}条视频预处理")
+if 'trimming_started' not in st.session_state:
+    st.session_state.trimming_started = False
+
+if not st.session_state.trimming_started:
+    thread = threading.Thread(target=lambda: batch_trim_videos(df['path']))
+    thread.daemon = True  # 设置为守护线程
+    thread.start()
+    st.session_state.trimming_started = True
 
 # 顶部下拉选框，选择当前视频目录，支持按文件名搜索
 selected_directory = st.selectbox("选择视频目录", directory_names, index=st.session_state.current_index)
