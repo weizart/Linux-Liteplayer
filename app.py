@@ -436,10 +436,10 @@ if "start_time" not in st.session_state:
 def main():
     # 初始化
     st.set_page_config(
-        page_title="HPC-AI 视频标注",
+        page_title="Linux Liteplayer",
         page_icon="📘",
     )
-    st.title("HPC-AI 视频标注")
+    st.title("Linux Liteplayer")
 
     # 选择任务
     old_task = st.session_state.current_task_index
